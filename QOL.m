@@ -32,7 +32,7 @@ surveys = {'HUI3','SF6D','SF36','EQ5D','DHI','VADL','ABC','VSS','VAS',...
 prompt = 'Select the MVI Study subject root folder.';
 MVI_path = uigetdir(prompt,prompt);
 if ~contains(MVI_path,'MVI')
-    error(['The selected path does not contain the text "MVI", so it is probably wrong: ',MVI_path])
+    disp(['The selected path does not contain the text "MVI", so it may be wrong: ',MVI_path])
 end
 % Load the raw, numeric survey data
 Qualtrics_path = [MVI_path,filesep,'Qualtrics'];
