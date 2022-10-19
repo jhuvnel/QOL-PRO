@@ -26,7 +26,6 @@ if ~isnumeric(opt)||~ismember(opt,1:length(opts)) %Invalid input
     opt = 1; %Default option, happens regardless
 end
 if nargin < 2 || isempty(MVI_path)
-    % Find the directory of IN PROGRESS/Questionnaires
     prompt = 'Select the MVI Study subject root folder.';
     MVI_path = uigetdir(prompt,prompt);
     if ~contains(MVI_path,'MVI')
@@ -38,9 +37,7 @@ surveys = {'HUI3','SF6D','SF36','EQ5D','DHI','VADL','ABC','VSS','VAS',...
     'OVAS','BVQ','THI','AI','NHIS'}; %Add as needed
 % Load the raw, numeric survey data
 Qualtrics_path = [MVI_path,filesep,'Qualtrics'];
-files = dir(Qualtrics_path);
-files([files.isdir]) = [];
-files(~contains({files.name},'.xlsx')|~contains({files.name},'Questionnaires')) = [];
+files = dir([Qualtrics_path,filesep,'*Questionnaires*.xlsx']);
 [~,t_ind] = sort(datetime({files.date}));
 in_path = [Qualtrics_path,filesep,files(t_ind(end)).name];
 %Load surveys
@@ -65,7 +62,7 @@ if opt == 1
         h = is_cand(i);
         %Get the date and other characteristics
         date = {datestr(surv.EndDate(h),'dd-mmm-yyyy')};
-        age = {str2num(surv.Q1_4_2{h})};
+        age = {str2double(surv.Q1_4_2{h})};
         if isempty(surv.Q1_4_2{h})
             age = NaN;
         end
@@ -179,23 +176,14 @@ if opt == 1
     save([Qualtrics_path,filesep,fname,'.mat'],'REDCAP')
     REDCAP_Demographics(REDCAP.BySubject);
     % Make a new pooled MVI subject file
-    MVIdirnames = dir(MVI_path);
-    MVIdirnames(~[MVIdirnames.isdir]) = [];
-    MVIdirnames(~contains({MVIdirnames.name},'MVI')|~contains({MVIdirnames.name},'_R')) = [];
-    MVIdirnames = {MVIdirnames.name}';
-    MVI_fnames = strcat({[MVI_path,filesep]},MVIdirnames,{filesep},strrep(MVIdirnames,'_',''),{'_SurveyResponses.xlsx'});
-    subjects = strrep(MVIdirnames,'_','');
+    MVI_fnames = strcat(extractfield(dir([MVI_path,filesep,'MVI*R*',filesep,'MVI*_SurveyResponses.xlsx']),'folder'),filesep,extractfield(dir([MVI_path,filesep,'MVI*R*',filesep,'MVI*_SurveyResponses.xlsx']),'name'));
+    subjects = strrep(extractfield(dir([MVI_path,filesep,'MVI*R*',filesep,'MVI*_SurveyResponses.xlsx']),'name'),'_SurveyResponses.xlsx','');
     all_results = cell(length(MVI_fnames),1);
     %Assumes they all have the same score order
     for i = 1:length(MVI_fnames)
-        if isfile(MVI_fnames{i})
-            try %Fails on mac for some reason
-                [~,~,scores2] = xlsread(MVI_fnames{i},'Scores');
-            catch %Reads the first sheet as the right sheet, thankfully
-                [~,~,scores2] = xlsread(MVI_fnames{i});
-            end
-            all_results{i} = [repmat(subjects(i),1,size(scores2,2)-1);scores2(:,2:end)]';
-        end
+        %Reads the first sheet as the right sheet, thankfully
+        [~,~,scores2] = xlsread(MVI_fnames{i});
+        all_results{i} = [repmat(subjects(i),1,size(scores2,2)-1);scores2(:,2:end)]';
     end
     %Trim off the excess
     all_results = [[{'Subject'},scores2(:,1)'];vertcat(all_results{:})];
@@ -213,21 +201,19 @@ elseif opt == 2
     sub_row = size(surv,1)+1-sub_indx;
     sub_name = surv.Q1_2{sub_row};
     %Select the file to put it into
-    MVIdirnames = dir(MVI_path);
-    MVIdirnames(~[MVIdirnames.isdir]) = [];
-    MVIdirnames(~contains({MVIdirnames.name},'MVI')|~contains({MVIdirnames.name},'_R')) = [];
-    MVIdirnames = {MVIdirnames.name}';
-    MVI_fnames = strcat({[MVI_path,filesep]},MVIdirnames,{filesep},strrep(MVIdirnames,'_',''),{'_SurveyResponses.xlsx'});
+    MVI_dir = extractfield(dir([MVI_path,filesep,'MVI*_R*']),'name');
+    MVI_fnames = strcat(extractfield(dir([MVI_path,filesep,'MVI*R*',filesep,'MVI*_SurveyResponses.xlsx']),'folder'),filesep,extractfield(dir([MVI_path,filesep,'MVI*R*',filesep,'MVI*_SurveyResponses.xlsx']),'name'));
     rel_file = MVI_fnames(contains(MVI_fnames,sub_name));
-    if length(rel_file)==1&&isfile(rel_file) %Unique file exists as expected
+    rel_dir = MVI_dir(contains(strrep(MVI_dir,'_',''),sub_name));
+    if length(rel_file)==1 %Unique file exists as expected
         out_path = rel_file{:};
-    elseif length(rel_file)==1 %MVI directory made but no file exists yet
+    elseif isempty(rel_file)&&length(rel_dir)==1 %MVI directory made but no file exists yet
         disp('MVI directory for this subject has been made but no file exists yet. Creating .xlsx file.')
-        out_path = rel_file{:};
+        out_path = [MVI_path,filesep,rel_dir,filesep,strrep(rel_dir,'_',''),'_SurveyResponses.xlsx'];
         writetable(table(),out_path);
-    elseif length(rel_file)>1
+    elseif length(rel_file)>1||length(rel_dir)>1
         error(['More than one directory found for the subject name: ',sub_name,'. Unclear which file to add scores to.'])
-    elseif isempty(rel_file)
+    elseif isempty(rel_file)&&isempty(rel_dir)
         error(['No directories found for the subject name: ',sub_name,'. Create one in the MVI***R*** format and retry.'])
     end
     % Properly format the visit name
@@ -291,14 +277,9 @@ elseif opt == 2
     all_results = cell(length(MVI_fnames),1);
     %Assumes they all have the same score order
     for i = 1:length(MVI_fnames)
-        if isfile(MVI_fnames{i})
-            try %Fails on mac for some reason
-                [~,~,scores2] = xlsread(MVI_fnames{i},'Scores');
-            catch %Reads the first sheet as the right sheet, thankfully
-                [~,~,scores2] = xlsread(MVI_fnames{i});
-            end
-            all_results{i} = [repmat(subjects(i),1,size(scores2,2)-1);scores2(:,2:end)]';
-        end
+        %Reads the first sheet as the right sheet, thankfully
+        [~,~,scores2] = xlsread(MVI_fnames{i});
+        all_results{i} = [repmat(subjects(i),1,size(scores2,2)-1);scores2(:,2:end)]';
     end
     %Trim off the excess
     all_results = [[{'Subject'},scores2(:,1)'];vertcat(all_results{:})];
