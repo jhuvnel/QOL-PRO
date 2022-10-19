@@ -1,4 +1,4 @@
-%% QOL
+%% processQOL
 %Processes the Excel file output from Qualtrics and provides user options
 %for what to do.
 %Assumes all the numeric responses were downloaded in accordance to the
@@ -12,7 +12,7 @@
 %Outputs the REDCAP struct, pooled MVI data and one set of scores for opts
 %2/3
 
-function [REDCAP,all_results,scores,MVI_path] = QOL(opt)
+function [REDCAP,all_results,scores,MVI_path] = processQOL(opt,MVI_path)
 %% Figure out which version to run
 opts = {'Remake REDCAP and MVI Summary Data','Add One Survey to MVI Excel File','Score One Survey'};
 if nargin < 1
@@ -25,15 +25,17 @@ end
 if ~isnumeric(opt)||~ismember(opt,1:length(opts)) %Invalid input
     opt = 1; %Default option, happens regardless
 end
+if nargin < 2 || isempty(MVI_path)
+    % Find the directory of IN PROGRESS/Questionnaires
+    prompt = 'Select the MVI Study subject root folder.';
+    MVI_path = uigetdir(prompt,prompt);
+    if ~contains(MVI_path,'MVI')
+        disp(['The selected path does not contain the text "MVI", so it may be wrong: ',MVI_path])
+    end
+end
 %% Load in Qualtrics Excel File
 surveys = {'HUI3','SF6D','SF36','EQ5D','DHI','VADL','ABC','VSS','VAS',...
     'OVAS','BVQ','THI','AI','NHIS'}; %Add as needed
-% Find the directory of IN PROGRESS/Questionnaires
-prompt = 'Select the MVI Study subject root folder.';
-MVI_path = uigetdir(prompt,prompt);
-if ~contains(MVI_path,'MVI')
-    disp(['The selected path does not contain the text "MVI", so it may be wrong: ',MVI_path])
-end
 % Load the raw, numeric survey data
 Qualtrics_path = [MVI_path,filesep,'Qualtrics'];
 files = dir(Qualtrics_path);

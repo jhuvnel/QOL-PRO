@@ -1,7 +1,12 @@
+function MVI_path = plotQOL_MVI_Summary(MVI_path)
 %% Style of the 2021 FDA Report graphs 
 %Editted for 2022 FDA report
 %% Reruns MVI all results
-[~,all_results,~,MVI_path] = QOL(1);
+if nargin < 1 || isempty(MVI_path)
+    [~,all_results,~,MVI_path] = processQOL(1);
+else
+    [~,all_results,~,MVI_path] = processQOL(1,MVI_path);
+end
 fig_path = [MVI_path,filesep,'Summary Figures'];
 subjects = unique(all_results(2:end,1));
 sub_mark = 'xdo^ps+hv<'; %MVI001-MVI010
@@ -50,7 +55,6 @@ sublinewid = 0.5;
 sublinecol = 0*[1,1,1];
 submarkwid = 0.5;
 submarksize= 8;
-ylabsize = 14;
 labfontsize = 9;
 color = repmat({'k'},length(subjects),1);
 %Initialize axes
@@ -122,10 +126,8 @@ fname1 = [fig_path,filesep,datestr(now,'yyyymmdd'),'_SummaryQOLOverTime_AllSub.f
 savefig(fig1,fname1)
 saveas(fig1,strrep(fname1,'fig','png'))
 %% Boxplot with year follow ups
-s = rng(13); %Seed so it's not always changing
 line_norm = 0.5;
 line_bold = 1.5;
-line_med = 1;
 mark_size_big = 25;
 mark_size_med = 8;
 offs1 = 0.2*rand(length(subjects),1)-0.1;
@@ -202,3 +204,4 @@ end
 fname2 = [fig_path,filesep,datestr(now,'yyyymmdd'),'_SummaryQOLPreOpChange_AllSub.fig'];
 savefig(fig2,fname2)
 saveas(fig2,strrep(fname2,'fig','png'))
+end

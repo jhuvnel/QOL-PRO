@@ -1,7 +1,12 @@
 %% Plot QOL MVI Each Survey
 %This script will load the most recent Pooled Data file and plot any of the
 %requested scores or subscores.
-[~,all_results,~,MVI_path] = QOL(1);
+function MVI_path = plotQOL_MVI_EachSurvey(MVI_path)
+if nargin < 1 || isempty(MVI_path)
+    [~,all_results,~,MVI_path] = processQOL(1);
+else
+    [~,all_results,~,MVI_path] = processQOL(1,MVI_path);
+end
 subjects = unique(all_results(2:end,1));
 surveys = all_results(1,4:end);
 plot_marker_all = 'xdo^ps+hv<*';
@@ -21,7 +26,7 @@ inds = 1:length(subjects);
 rm_sub = ~contains(all_results(:,1),subjects(inds));
 all_results(rm_sub,:) = [];
 subjects = subjects(inds);
-sub_num = cellfun(@(x) num2str(str2num(x(4:6))),subjects,'UniformOutput',false);
+sub_num = cellfun(@(x) num2str(str2double(x(4:6))),subjects,'UniformOutput',false);
 plot_marker = plot_marker_all(inds);
 %Select subjects to make blue
 ind_blue = listdlg('PromptString','Select the subjects to bold:',...
@@ -58,7 +63,6 @@ end
 years2plot = [-0.1,0,0.2,0.5,1,2,4];
 xtick2plot = [21,years2plot(2:end)*365.25+30];
 sublinewid = 0.5;
-sublinecol = 0*[1,1,1];
 submarkwid = 0.5;
 submarksize= 8;
 XLim1 = [17 2600];
@@ -70,11 +74,8 @@ wid_x2 = 0.19;
 y1 = 0.09;
 height_y = 0.86;
 offs = 0.05*randn(length(subjects),1);
-ylabsize = 12;
 for i = 1:length(ind_surv)
     Score = surveys{ind_surv(i)};
-    sub_surv = all_results(:,[1:3,ind_surv(i)+3]);
-    sub_mat = all_scores_mat(:,ind_surv(i));
     sub_diff_mat = reshape(diff_yr_mat(:,:,ind_surv(i)),length(subjects),length(vis));  
     %Display stats
     disp([Score,': '])
@@ -87,7 +88,7 @@ for i = 1:length(ind_surv)
     end
     %Open the figure
     fig = figure(i);
-    set(fig,'Color',[1,1,1],'Units','inches','Position',[5 4 7 5])
+    set(fig,'Color',[1,1,1],'Units','inches','Position',[1 1 7 5])
     ha(1) = subplot(2,1,1);
     ha(2) = subplot(2,1,2);
     set(ha(1),'Position',[x1,y1,wid_x1,height_y])
@@ -137,4 +138,5 @@ for i = 1:length(ind_surv)
     fig_name = [datestr(now,'yyyymmdd'),'_QOL_',strrep(Score,' ','')];
     savefig(fig,[MVI_path,filesep,'Summary Figures',filesep,fig_name,'.fig'])
     saveas(fig,[MVI_path,filesep,'Summary Figures',filesep,fig_name,'.png'])
+end
 end

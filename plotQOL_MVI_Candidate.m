@@ -1,11 +1,18 @@
 %% Rerun script to generate REDCAP struct and load in the most recent MVI data
 %Right now, this script generates but doesn't save the figure
-[~,all_results,scores,MVI_path] = QOL(3);
+function MVI_path = plotQOL_MVI_Candidate(MVI_path)
+%% Style of the 2021 FDA Report graphs 
+%Editted for 2022 FDA report
+%% Reruns MVI all results
+if nargin < 1 || isempty(MVI_path)
+    [~,all_results,scores,MVI_path] = processQOL(3);
+else
+    [~,all_results,scores,MVI_path] = processQOL(3,MVI_path);
+end
 temp = split(scores{1,2});
 Rnum = temp(1);
-Rdate = temp{4};
 subjects = [unique(all_results(2:end,1));Rnum];
-sub_num = [cellfun(@(x) num2str(str2num(x(4:6))),unique(all_results(2:end,1)),'UniformOutput',false);Rnum];
+sub_num = [cellfun(@(x) num2str(str2double(x(4:6))),unique(all_results(2:end,1)),'UniformOutput',false);Rnum];
 plot_marker_all = 'xdo^ps+hv<*';
 plot_marker = plot_marker_all([1:(length(subjects)-1),length(plot_marker_all)]);
 if length(subjects)>length(plot_marker)
@@ -35,7 +42,7 @@ submarkwid = 0.5;
 submarksize = 8;
 fig = figure(1);
 clf;
-set(fig,'Color',[1,1,1],'Units','inches','Position',[5 4 5 5]);
+set(fig,'Color',[1,1,1],'Units','inches','Position',[1 1 5 5]);
 h = gobjects(length(subjects),1);
 ha = gobjects(1,4);
 for i = 1:4
@@ -74,8 +81,4 @@ leg = legend(ha(1),h,sub_num,'NumColumns',length(subjects),'box','off');
 leg.ItemTokenSize(1) = 7;
 leg.Position = [0,0,0.99,0.1];
 title(leg,'Subjects')
-% % Save the figures
-% fname = [MVI_path,filesep,'MVIVis0-',Rnum{:},'-',strrep(Rdate,'-',''),'-SurveyResults'];
-% savefig(fig,[fname,'.fig']);
-% saveas(fig,[fname,'.png']);
-% disp(['Figure has been saved as: ',fname])
+end
