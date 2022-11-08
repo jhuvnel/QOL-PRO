@@ -9,8 +9,9 @@ if nargin < 1 || isempty(MVI_path)
 else
     [~,all_results,scores,MVI_path] = processQOL(3,MVI_path);
 end
-temp = split(scores{1,2});
+temp = split(scores{1,2},' | ');
 Rnum = temp(1);
+Rdate = strrep(strrep(strrep(temp{end},'-',''),' ','-'),':','');
 subjects = [unique(all_results(2:end,1));Rnum];
 sub_num = [cellfun(@(x) num2str(str2double(x(4:6))),unique(all_results(2:end,1)),'UniformOutput',false);Rnum];
 plot_marker_all = 'xdo^ps+hv<*';
@@ -81,4 +82,5 @@ leg = legend(ha(1),h,sub_num,'NumColumns',length(subjects),'box','off');
 leg.ItemTokenSize(1) = 7;
 leg.Position = [0,0,0.99,0.1];
 title(leg,'Subjects')
+disp([Rnum{:},'-',Rdate,'-SurveyResponses'])
 end

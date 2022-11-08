@@ -56,7 +56,7 @@ subs = surv.Q1_2;
 if opt == 1
     %% Save files with REDCAP Candidates who are NOT yet in the MVI trial
     is_cand = find(cellfun(@(x) x(1),subs)=='R'&surv.Finished==1&~contains(subs,{'R141'})); %Is a candidate
-    sub_labs = cell(length(is_cand),6);
+    sub_labs = cell(length(is_cand),7);
     score_mat = NaN(length(is_cand),51); %change when surveys change
     for i = 1:length(is_cand)
         h = is_cand(i);
@@ -82,26 +82,34 @@ if opt == 1
         if isempty(race{:})
             race = {'U'};
         end
+        symp_resp = surv.Q15_8(h);
+        symp_vec = {'<3mo','3-12mo','1-3yr','3-5yr','5-10yr','10-15yr','>15yr'};
+        if isnan(symp_resp)
+            symp_dur = {'U'};
+        else
+            symp_dur = symp_vec(symp_resp);
+        end
         [score_labs1,scores] = scoreAllSurveys(surv,h,surveys);
         score_mat(i,:) = cell2mat(scores)';
-        sub_labs(i,:) = [subs(h),age,gender,eth,race,date];
+        sub_labs(i,:) = [subs(h),date,age,gender,eth,race,symp_dur];
     end
-    score_labs = [{'Subject','Age','Gender','Ethnicity','Race','Date'},strrep(strrep(strrep(score_labs1',' ','_'),'-',''),'/','')];
+    score_labs = [{'Subject','Date','Age','Gender','Ethnicity','Race','SymptomDuration'},strrep(strrep(strrep(score_labs1',' ','_'),'-',''),'/','')];
     scores = [cell2table(sub_labs),array2table(score_mat)];
     scores.Properties.VariableNames = score_labs;
-    % Write Scores to Excel
     fname = 'REDCAPCandidateScores';
     writetable(scores,[Qualtrics_path,filesep,fname,'.xlsx'],'FileType','spreadsheet','WriteVariableNames',true,'Sheet','ByDate');
     REDCAP.ByDate = scores;
     scores = sortrows(scores,'Subject','ascend');
     writetable(scores,[Qualtrics_path,filesep,fname,'.xlsx'],'FileType','spreadsheet','WriteVariableNames',true,'Sheet','BySubject');
     REDCAP.BySubject = scores;
-    % Write Scores to Mat Files
-    scores.Date = datetime(scores.Date);
     %Write table with unique subjects only (if repeat measurements, take the
     %most recent on)
-    %Fill in missing demographics
+    %Remove subjects who have had these symptoms for <1yr or who did not
+    %say
+    scores(contains(scores.SymptomDuration,{'mo','U'}),:) = [];
+    %Now fill in missing demographics
     %Age
+    scores.Date = datetime(scores.Date);
     missing = find(isnan(scores.Age));
     for i = 1:length(missing)
         sub = scores.Subject(missing(i));
