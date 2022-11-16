@@ -27,7 +27,7 @@ while tf1
     end
     % Poll for new reponse
     [ind1,tf1] = listdlg('PromptString','Select an action:','SelectionMode','single',...
-                       'ListSize',[150 125],'ListString',opts); 
+                       'ListSize',[150 200],'ListString',opts); 
     if tf1
         resp1 = opts{ind1}; 
     end

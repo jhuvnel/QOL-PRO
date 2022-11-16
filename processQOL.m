@@ -281,7 +281,7 @@ elseif opt == 2
         writetable(cell2table([date;{visit};test]),out_path,'FileType','spreadsheet','WriteVariableNames',false,'Sheet',surveys{i},'Range',[col,'1:',col,num2str(length(test)+2)]);
     end
     % Make a new pooled MVI subject file
-    subjects = strrep(MVIdirnames,'_','');
+    subjects = strrep(MVI_dir,'_','');
     all_results = cell(length(MVI_fnames),1);
     %Assumes they all have the same score order
     for i = 1:length(MVI_fnames)
