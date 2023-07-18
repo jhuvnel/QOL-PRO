@@ -9,16 +9,18 @@ else
 end
 fig_path = [MVI_path,filesep,'Summary Figures'];
 subjects = unique(all_results(2:end,1));
-sub_mark = 'xdo^ps+hv<'; %MVI001-MVI010
+sub_mark = 'xdo^ps+hv<>|_'; %MVI001-MVI010
 survs = {'DHI Overall','SF-36 Utility','VADL Overall','HUI3 Overall'};
 MCIDs = [18,0.03,0,0.03];
 %Find indecies that correspond to visits of interest
 v0_ind = NaN(1,length(subjects));
+v1_ind = NaN(1,length(subjects));
 v3_ind = NaN(1,length(subjects));
 v9x_ind = NaN(1,length(subjects));
 v10x_ind = NaN(1,length(subjects));
 v11x_ind = NaN(1,length(subjects));
 v0_ind(ismember(subjects,all_results(cellfun(@(x) strcmp(x,'0'),all_results(:,3)),1))) = find(cellfun(@(x) strcmp(x,'0'),all_results(:,3)));
+v1_ind(ismember(subjects,all_results(cellfun(@(x) strcmp(x,'1'),all_results(:,3)),1))) = find(cellfun(@(x) strcmp(x,'1'),all_results(:,3)));
 v3_ind(ismember(subjects,all_results(cellfun(@(x) strcmp(x,'3'),all_results(:,3)),1))) = find(cellfun(@(x) strcmp(x,'3'),all_results(:,3)));
 v9x_ind(ismember(subjects,all_results(cellfun(@(x) strcmp(x,'9x'),all_results(:,3)),1))) = find(cellfun(@(x) strcmp(x,'9x'),all_results(:,3)));
 v10x_ind(ismember(subjects,all_results(cellfun(@(x) strcmp(x,'10x'),all_results(:,3)),1))) = find(cellfun(@(x) strcmp(x,'10x'),all_results(:,3)));
@@ -76,7 +78,7 @@ ha(4).Position = [x(2) y(1) xwid ywid];
 years2plot = [-0.1,0,0.2,0.5,1,2,4];
 xtick2plot = [17,years2plot(2:end)*365.25+30];
 XLim = [13 3000]; 
-YLim = [-7 100; 0.43 0.93; -0.15 6.5; -0.14 1.05];
+YLim = [-7 100; 0.43 0.93; -0.15 7.5; -0.14 1.05];
 for i = 1:4
     surv_ind = find(contains(all_results(1,:),survs{i}));
     sub_surv = all_results(:,[1:3,surv_ind]); 
@@ -88,6 +90,12 @@ for i = 1:4
         %Remove Surveys before Visit 0
         if find(sub_rel_inds,1,'first') < v0_ind(j)
             sub_rel_inds(1:v0_ind(j)-1) = 0;
+        end
+        %If there was a Visit 1 survey, remove surveys before that
+        if ~isnan(v1_ind(j))
+            if find(sub_rel_inds,1,'first') < v1_ind(j)
+                sub_rel_inds(1:v1_ind(j)-1) = 0;
+            end
         end
         sub_t = days(datetime(sub_surv(sub_rel_inds,2))-datetime(sub_surv(v3_ind(j),2)))+30;
         sub_t(1) = 17; %Shift visit 0 
@@ -106,8 +114,8 @@ set(ha([1,3]),'YDir','reverse')
 xlabel(ha(3:4),'Years Since Activation')  
 title(ha(1),{'Vestibular Disability and Dizziness'})
 title(ha(2),{'Health-Related Quality of Life'})
-leg2_labs = {'1','2','3','4','5','6','7','8','9','10'};
-leg2 = legend(ha(2),h1,leg2_labs,'Location','southeast','NumColumns',5,'box','off');
+leg2_labs = {'1','2','3','4','5','6','7','8','9','10','11','12'};
+leg2 = legend(ha(2),h1,leg2_labs,'Location','southeast','NumColumns',6,'box','off');
 leg2.ItemTokenSize(1) = 5;
 text(ha(2),1*365.25+30,0.52,'Subjects')
 %Figure letter labels
@@ -181,8 +189,8 @@ xlabel(ha(3:4),'Years After Implantation')
 leg1_labs = {'Median Change from Pre-Op','Minimally Important Difference'};
 leg1 = legend(ha(1),h1,leg1_labs,'Location','southeast','NumColumns',1,'box','off');
 leg1.ItemTokenSize(1) = 15;
-leg2_labs = {'1','2','3','4','5','6','7','8','9','10'};
-leg2 = legend(ha(2),h2,leg2_labs,'Location','southeast','NumColumns',5,'box','off');
+leg2_labs = {'1','2','3','4','5','6','7','8','9','10','11','12'};
+leg2 = legend(ha(2),h2,leg2_labs,'Location','southeast','NumColumns',6,'box','off');
 leg2.ItemTokenSize(1) = 5;
 text(ha(2),1,-0.09,'Subjects')
 %Set axes position now

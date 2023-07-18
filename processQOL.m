@@ -251,7 +251,7 @@ elseif opt == 2
     [~,~,dates] = xlsread(out_path);
     %Get the date
     date = {datestr(surv.EndDate(sub_row),'dd-mmm-yyyy')};
-    if isempty(dates) %Empty sheet
+    if any([isempty(dates), isnan(dates{1,1})]) %Empty sheet
         col = 'B';
     else
         dates = dates(1,:);
