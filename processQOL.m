@@ -45,6 +45,9 @@ warning('off')
 surv = readtable(in_path);
 warning('on')
 %REMOVE INCOMPLETE SURVEYS
+if iscell(surv.Finished)
+    surv.Finished = contains(surv.Finished,'True');
+end
 surv(~surv.Finished,:) = [];
 if isdatetime(surv.EndDate(1))
     identity = strcat(surv.Q1_2,{' | '},surv.Q1_3,{' | '},datestr(surv.EndDate));
@@ -248,9 +251,9 @@ elseif opt == 2
     Alphabet = num2cell('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
     col_names = [Alphabet,strcat(reshape(repmat(Alphabet,26,1),[],1)',repmat(Alphabet,1,26))];
     %Find where the visit should go
-    [~,~,dates] = xlsread(out_path);
+    dates = readcell(out_path);
     %Get the date
-    date = {datestr(surv.EndDate(sub_row),'dd-mmm-yyyy')};
+    date = cellstr(string(surv.EndDate(sub_row),'dd-MMM-yyyy'));
     if isempty(dates) %Empty sheet
         col = 'B';
     else
@@ -286,12 +289,16 @@ elseif opt == 2
     %Assumes they all have the same score order
     for i = 1:length(MVI_fnames)
         %Reads the first sheet as the right sheet, thankfully
-        [~,~,scores2] = xlsread(MVI_fnames{i});
+        scores2 = readcell(MVI_fnames{i});
         all_results{i} = [repmat(subjects(i),1,size(scores2,2)-1);scores2(:,2:end)]';
     end
     %Trim off the excess
-    all_results = [[{'Subject'},scores2(:,1)'];vertcat(all_results{:})];
-    all_results(cellfun(@isnumeric,all_results(:,3)),3) = {''}; %Replace NaN with empty cell for visit name
+    all_results = [[{'Subject'},scores2(:,1)'];vertcat(all_results{:})];    
+    if any(cellfun(@isnumeric,all_results(:,3))) %Old MATLAB version
+        all_results(cellfun(@isnumeric,all_results(:,3)),3) = {''}; %Replace NaN with empty cell for visit name
+    else
+        all_results(cellfun(@(x) any(ismissing(x)),all_results)) = {''}; %Replace NaN with empty cell for visit name
+    end
     save([MVI_path,filesep','ALLMVI-SurveyResults.mat'],'all_results')
     writecell(all_results,[MVI_path,filesep','ALLMVI-SurveyResults.xlsx'])
     % Load REDCAP most recent file

@@ -10,6 +10,10 @@ opts = {'Score One Survey','Add Survey to MVI File',...
 resp1 = '';
 tf1 = 1;
 MVI_path = '';
+curr_path = cd;
+if strcmp(curr_path(end-13:end),'Study Subjects')
+    MVI_path = cd;
+end
 while tf1
     switch resp1
         case 'Score One Survey'
