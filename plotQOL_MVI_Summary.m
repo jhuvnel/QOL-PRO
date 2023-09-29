@@ -114,8 +114,8 @@ set(ha([1,3]),'YDir','reverse')
 xlabel(ha(3:4),'Years Since Activation')  
 title(ha(1),{'Vestibular Disability and Dizziness'})
 title(ha(2),{'Health-Related Quality of Life'})
-leg2_labs = {'1','2','3','4','5','6','7','8','9','10','11','12'};
-leg2 = legend(ha(2),h1,leg2_labs,'Location','southeast','NumColumns',6,'box','off');
+leg2_labs = {'1','2','3','4','5','6','7','8','9','10','11','12','13'};
+leg2 = legend(ha(2),h1,leg2_labs,'Location','southeast','NumColumns',7,'box','off');
 leg2.ItemTokenSize(1) = 5;
 text(ha(2),1*365.25+30,0.52,'Subjects')
 %Figure letter labels
@@ -189,10 +189,10 @@ xlabel(ha(3:4),'Years After Implantation')
 leg1_labs = {'Median Change from Pre-Op','Minimally Important Difference'};
 leg1 = legend(ha(1),h1,leg1_labs,'Location','southeast','NumColumns',1,'box','off');
 leg1.ItemTokenSize(1) = 15;
-leg2_labs = {'1','2','3','4','5','6','7','8','9','10','11','12'};
-leg2 = legend(ha(2),h2,leg2_labs,'Location','southeast','NumColumns',6,'box','off');
+leg2_labs = {'1','2','3','4','5','6','7','8','9','10','11','12','13'};
+leg2 = legend(ha(2),h2,leg2_labs,'Location','southeast','NumColumns',7,'box','off');
 leg2.ItemTokenSize(1) = 5;
-text(ha(2),1,-0.09,'Subjects')
+text(ha(2),2.307,-0.0424,'Subjects')
 %Set axes position now
 for j = 1:4
     ha(j).Position = [xpos(j) ypos(j) xwid ywid];
