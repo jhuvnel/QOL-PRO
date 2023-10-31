@@ -9,7 +9,7 @@ else
 end
 fig_path = [MVI_path,filesep,'Summary Figures'];
 subjects = unique(all_results(2:end,1));
-sub_mark = 'xdo^ps+hv<'; %MVI001-MVI010
+sub_mark = 'xdo^ps+hv<>|_'; %MVI001-MVI013
 survs = {'DHI Overall','SF-36 Utility','VADL Overall','HUI3 Overall'};
 MCIDs = [18,0.03,0,0.03];
 %Find indecies that correspond to visits of interest
