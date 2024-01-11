@@ -145,7 +145,7 @@ for i = 1:length(annot_string)
 end 
 fname1 = [fig_path,filesep,datestr(now,'yyyymmdd'),'_SummaryQOLOverTime_AllSub.fig'];
 savefig(fig1,fname1)
-saveas(fig1,strrep(fname1,'fig','png'))
+saveas(fig1,strrep(fname1,'fig','svg'))
 %% Boxplot with year follow ups
 line_norm = 0.5;
 line_bold = 1.5;
@@ -226,5 +226,5 @@ for i = 1:length(annot_string)
 end 
 fname2 = [fig_path,filesep,datestr(now,'yyyymmdd'),'_SummaryQOLPreOpChange_AllSub.fig'];
 savefig(fig2,fname2)
-saveas(fig2,strrep(fname2,'fig','png'))
+saveas(fig2,strrep(fname2,'fig','svg'))
 end
