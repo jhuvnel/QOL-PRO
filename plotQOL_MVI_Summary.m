@@ -1,6 +1,6 @@
 function MVI_path = plotQOL_MVI_Summary(MVI_path)
 %% Style of the 2021 FDA Report graphs 
-%Editted for 2022 FDA report
+% Edited by EOV for 2024-01 DSMB report.
 %% Reruns MVI all results
 if nargin < 1 || isempty(MVI_path)
     [~,all_results,~,MVI_path] = processQOL(1);
@@ -9,7 +9,7 @@ else
 end
 fig_path = [MVI_path,filesep,'Summary Figures'];
 subjects = unique(all_results(2:end,1));
-sub_mark = 'xdo^ps+hv<>|_'; %MVI001-MVI010
+sub_mark = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; % Since we now have 14(+) subjects we are using letters as marker labels
 survs = {'DHI Overall','SF-36 Utility','VADL Overall','HUI3 Overall'};
 MCIDs = [18,0.03,0,0.03];
 %Find indecies that correspond to visits of interest
@@ -100,8 +100,8 @@ for i = 1:4
         sub_t = days(datetime(sub_surv(sub_rel_inds,2))-datetime(sub_surv(v3_ind(j),2)))+30;
         sub_t(1) = 17; %Shift visit 0 
         rel_mat = [sub_surv{sub_rel_inds,4}];
-        h1(j) = plot(sub_t,rel_mat,sub_mark(j),'Color',color{j},'LineWidth',submarkwid,'MarkerSize',submarksize);
-        plot(sub_t,rel_mat,'-','Color',sublinecol,'LineWidth',sublinewid)
+        text(sub_t,rel_mat,sub_mark(j),'Color',color{j},'FontSize',submarksize,'HorizontalAlignment','center'); % plot subject labels
+        h1(j) = plot(sub_t,rel_mat,':','Color',sublinecol,'LineWidth',sublinewid);
     end
     hold off
     ylabel(ha(i),survs{i}) 
@@ -114,11 +114,24 @@ set(ha([1,3]),'YDir','reverse')
 xlabel(ha(3:4),'Years Since Activation')  
 title(ha(1),{'Vestibular Disability and Dizziness'})
 title(ha(2),{'Health-Related Quality of Life'})
-leg2_labs = {'1','2','3','4','5','6','7','8','9','10','11','12','13'};
-leg2 = legend(ha(2),h1,leg2_labs,'Location','southeast','NumColumns',7,'box','off');
-leg2.ItemTokenSize(1) = 5;
-text(ha(2),1*365.25+30,0.52,'Subjects')
-%Figure letter labels
+% Legend
+% leg2_labs = {'1','2','3','4','5','6','7','8','9','10','11','12','13','14'};
+% leg2 = legend(ha(2),h1,leg2_labs,'Location','southeast','NumColumns',7,'box','off');
+leg_cell = {'',''};
+for i = 1:length(subjects)
+    if i < length(subjects)/2 + 1
+        leg_cell{1} = [leg_cell{1},sub_mark(i),': ',num2str(i),'  '];
+    else
+        leg_cell{2} = [leg_cell{2},sub_mark(i),': ',num2str(i)];
+        if i ~= length(subjects)
+            leg_cell{2} = [leg_cell{2},'  '];
+        end
+    end
+end
+leg2 = annotation('textbox',[0.65, 0.537, 0.32, 0.05],'String',leg_cell,'FontSize',8,'FitBoxToText','on');
+% leg2.ItemTokenSize(1) = 5;
+text(ha(2),1*160,0.52,'Subjects')
+% Figure letter labels
 annot_wid_x = 0.04;
 annot_wid_y = 0.04;
 annot_pos_x = [(x(1)+0.009)*ones(1,2),(x(2)+0.009)*ones(1,2)];
@@ -170,7 +183,8 @@ for j = 1:4
     plot(1,0,'Color','k','Marker','.','MarkerSize',mark_size_big,'LineWidth',line_norm)
     h1(1) = plot(1:4,median(surv_mat(:,:,j),2,'omitnan'),'-','Color','k','LineWidth',line_bold);
     for i=1:length(subjects)
-        h2(i) = plot((2:4)+offs1(i)-0.3,surv_mat(2:end,i,j),'.','Color','k','Marker',sub_mark(i),'MarkerSize',mark_size_med,'LineWidth',line_norm);
+        text((2:4)+offs1(i)-0.3,surv_mat(2:end,i,j),sub_mark(i),'Color','k','FontSize',mark_size_med,'HorizontalAlignment','center'); % plot subject labels
+%         h2(i) = plot((2:4)+offs1(i)-0.3,surv_mat(2:end,i,j),'.','Color','k','Marker',sub_mark(i),'MarkerSize',mark_size_med,'LineWidth',line_norm);
     end
     hold off 
     set(ha(j), 'Layer', 'top');
@@ -189,9 +203,10 @@ xlabel(ha(3:4),'Years After Implantation')
 leg1_labs = {'Median Change from Pre-Op','Minimally Important Difference'};
 leg1 = legend(ha(1),h1,leg1_labs,'Location','southeast','NumColumns',1,'box','off');
 leg1.ItemTokenSize(1) = 15;
-leg2_labs = {'1','2','3','4','5','6','7','8','9','10','11','12','13'};
-leg2 = legend(ha(2),h2,leg2_labs,'Location','southeast','NumColumns',7,'box','off');
-leg2.ItemTokenSize(1) = 5;
+
+leg2 = annotation('textbox',[0.62, 0.5585, 0.37, 0.1],'String',leg_cell,'FontSize',8,'LineStyle','none');
+% leg2 = legend(ha(2),h2,leg2_labs,'Location','southeast','NumColumns',7,'box','off');
+% leg2.ItemTokenSize(1) = 5;
 text(ha(2),2.307,-0.0424,'Subjects')
 %Set axes position now
 for j = 1:4

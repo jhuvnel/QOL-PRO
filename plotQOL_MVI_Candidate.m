@@ -14,7 +14,7 @@ Rnum = temp(1);
 Rdate = strrep(strrep(strrep(temp{end},'-',''),' ','-'),':','');
 subjects = [unique(all_results(2:end,1));Rnum];
 sub_num = [cellfun(@(x) num2str(str2double(x(4:6))),unique(all_results(2:end,1)),'UniformOutput',false);Rnum];
-plot_marker_all = 'xdo^ps+hv<*';
+plot_marker_all = 'xdo^ps+hv<>|_*';
 plot_marker = plot_marker_all([1:(length(subjects)-1),length(plot_marker_all)]);
 if length(subjects)>length(plot_marker)
     disp('Not enough defined plot markers for the number of subjects')
