@@ -220,7 +220,7 @@ elseif opt == 2
         out_path = rel_file{:};
     elseif isempty(rel_file)&&length(rel_dir)==1 %MVI directory made but no file exists yet
         disp('MVI directory for this subject has been made but no file exists yet. Creating .xlsx file.')
-        out_path = [MVI_path,filesep,rel_dir,filesep,strrep(rel_dir,'_',''),'_SurveyResponses.xlsx'];
+        out_path = [MVI_path,filesep,rel_dir{:},filesep,strrep(rel_dir{:},'_',''),'_SurveyResponses.xlsx'];
         writetable(table(),out_path);
     elseif length(rel_file)>1||length(rel_dir)>1
         error(['More than one directory found for the subject name: ',sub_name,'. Unclear which file to add scores to.'])
