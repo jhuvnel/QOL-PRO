@@ -9,7 +9,7 @@ else
 end
 subjects = unique(all_results(2:end,1));
 surveys = all_results(1,4:end);
-plot_marker_all = 'xdo^ps+hv<*';
+plot_marker_all = 'xdo^ps+hv<>|_*'; %MVI001-MVI013 plus specified scores;
 if length(subjects)>length(plot_marker_all)
     disp('Not enough defined plot markers for the number of subjects')
     return;
