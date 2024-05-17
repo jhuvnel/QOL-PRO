@@ -70,7 +70,11 @@ function scores = parseQualtricsResponses(survey,num,surv,sub_row)
             else
                 vec(2:6,1) = 0; %NOT TRUE but a placeholder
             end
-            vec(8,1) = surv{sub_row,contains(labs,[Qnum,'8'])}>2;
+            if ~isempty(surv{sub_row,contains(labs,[Qnum,'8'])})
+                vec(8,1) = surv{sub_row,contains(labs,[Qnum,'8'])}>2;
+            else % if they did not fill out this question
+                vec(8,1) = 0;
+            end
             scores(vec==0) = {'n'};
             scores(vec==1) = {'y'};
             scores{7,1} = surv{sub_row,contains(labs,[Qnum,'4'])};
