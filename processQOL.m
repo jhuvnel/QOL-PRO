@@ -346,8 +346,10 @@ elseif opt == 2
     all_results = [[{'Subject'},scores2(:,1)'];vertcat(all_results{:})];    
     if any(cellfun(@isnumeric,all_results(:,3))) %Old MATLAB version
         all_results(cellfun(@isnumeric,all_results(:,3)),3) = {''}; %Replace NaN with empty cell for visit name
-    else
-        all_results(cellfun(@(x) any(ismissing(x)),all_results)) = {''}; %Replace NaN with empty cell for visit name
+    else %2024-06-26 AIA noticed that column titles were tagged as "missing" results 
+        ind = cellfun(@(x) any(ismissing(x)),all_results);
+        ind(1,:) = 0;
+        all_results(ind) = {''}; %Replace NaN with empty cell for visit name
     end
     save([MVI_path,filesep','ALLMVI-SurveyResults.mat'],'all_results')
     writecell(all_results,[MVI_path,filesep','ALLMVI-SurveyResults.xlsx'])
