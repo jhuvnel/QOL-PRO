@@ -204,9 +204,8 @@ leg1_labs = {'Median Change from Pre-Op','Minimally Important Difference'};
 leg1 = legend(ha(1),h1,leg1_labs,'Location','southeast','NumColumns',1,'box','off');
 leg1.ItemTokenSize(1) = 15;
 
-leg2 = annotation('textbox',[0.62, 0.5585, 0.37, 0.1],'String',leg_cell,'FontSize',8,'LineStyle','none');
-% leg2 = legend(ha(2),h2,leg2_labs,'Location','southeast','NumColumns',7,'box','off');
-% leg2.ItemTokenSize(1) = 5;
+leg2 = annotation('textbox',[0.605,0.555,0.38,0.099],'String',leg_cell,'FontSize',8,'FitBoxToText','on');
+
 text(ha(2),2.307,-0.0424,'Subjects')
 %Set axes position now
 for j = 1:4
