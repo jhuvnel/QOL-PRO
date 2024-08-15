@@ -300,7 +300,7 @@ elseif opt == 2
     source_path = [MVI_path,filesep,char(rel_dir),filesep,visit,filesep,'Questionnaires'];
     dateval = char(datetime(surv.EndDate(sub_row),'Format','yyyy-MM-dd HH:mm'));
     switch subject
-        case {'MVI011R031','MVI012R897','MVI013R864'}
+        case {'MVI011R031','MVI012R897','MVI013R864','MVI016R873'}
             fold = 'IRB00335294 NIDCD';
         case {'MVI014R1219','MVI015R1209','R164','R1054'}
             fold = 'IRB00346924 NIA';
