@@ -153,9 +153,20 @@ xlabel(ha(3:4),xlab)
 %Legends
 leg1 = legend(ha(1),h1,leg1_labs,'Location','southwest','NumColumns',2,'box','off');
 leg1.ItemTokenSize(1) = 15;
+<<<<<<< HEAD
 leg1.Position = [0.5-0.5*leg1.Position(3),0,leg1.Position(3:4)];
 annotation('textbox',[0 leg1.Position(4) 1 xmin],'String',leg_cell,'FontSize',submarksize,...
     'HorizontalAlignment','center','VerticalAlignment','bottom','FitBoxToText','on');
+=======
+
+leg2 = annotation('textbox',[0.605,0.555,0.38,0.099],'String',leg_cell,'FontSize',8,'FitBoxToText','on');
+
+text(ha(2),2.307,-0.0424,'Subjects')
+%Set axes position now
+for j = 1:4
+    ha(j).Position = [xpos(j) ypos(j) xwid ywid];
+end
+>>>>>>> 943243a602ce712ce9534f1ba55fcab2038d611d
 %Figure letter labels
 annot_wid_x = 0.042;  annot_wid_y = 0.06;
 annot_pos_x = [(x(1)+0.009)*ones(1,2),(x(2)+0.009)*ones(1,2)];

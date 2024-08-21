@@ -193,7 +193,13 @@ if opt == 1
     %Assumes they all have the same score order
     for i = 1:length(MVI_fnames)
         %Reads the first sheet as the right sheet, thankfully
-        [~,~,scores2] = xlsread(MVI_fnames{i});
+        % [~,~,scores2] = xlsread(MVI_fnames{i});
+        import_opts = detectImportOptions(MVI_fnames{i}, 'ReadVariableNames', false);
+        import_opts.DataRange = 'A1';
+        import_opts = setvaropts(import_opts, import_opts.VariableNames(2:end), 'FillValue', NaN);
+        [scores2] = readcell(MVI_fnames{i}, import_opts);
+        % replace missing values with NaN's
+        [scores2{cellfun(@any, cellfun(@ismissing, scores2, 'UniformOutput', false))}] = deal(NaN);
         all_results{i} = [repmat(subjects(i),1,size(scores2,2)-1);scores2(:,2:end)]';
     end
     %Trim off the excess
@@ -294,7 +300,7 @@ elseif opt == 2
     source_path = [MVI_path,filesep,char(rel_dir),filesep,visit,filesep,'Questionnaires'];
     dateval = char(datetime(surv.EndDate(sub_row),'Format','yyyy-MM-dd HH:mm'));
     switch subject
-        case {'MVI011R031','MVI012R897','MVI013R864'}
+        case {'MVI011R031','MVI012R897','MVI013R864','MVI016R873'}
             fold = 'IRB00335294 NIDCD';
         case {'MVI014R1219','MVI015R1209','R164','R1054'}
             fold = 'IRB00346924 NIA';
