@@ -302,7 +302,7 @@ elseif opt == 2
     switch subject
         case {'MVI011R031','MVI012R897','MVI013R864','MVI016R873'}
             fold = 'IRB00335294 NIDCD';
-        case {'MVI014R1219','MVI015R1209','R164','R1054'}
+        case {'MVI014R1219','MVI015R1209','MVI017R1283','R164','R1054'}
             fold = 'IRB00346924 NIA';
         otherwise %old protocol for MVI1-10 and R205
             fold = 'NA_00051349';
