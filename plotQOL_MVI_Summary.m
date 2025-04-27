@@ -56,7 +56,7 @@ y = ymin:(ywid+yspc):ymax;
 years2plot = [-0.1,0,0.2,0.5,1,2,4,8];
 xtick2plot = [17,years2plot(2:end)*365.25+30];
 XLim = [13 3500]; 
-YLim = [-7 100; 0.43 0.93; -0.15 7.5; -0.14 1.05];
+YLim = [-7 100; 0.38 0.93; -0.15 9.2; -0.24 1.05];
 %Initialize axes
 ha = gobjects(4,1);
 fig1 = figure(1);
@@ -95,7 +95,8 @@ title(ha(1),{'Vestibular Disability and Dizziness'})
 title(ha(2),{'Health-Related Quality of Life'})
 % Legend
 annotation('textbox',[0.01 0.01 0.98 xmin],'String',leg_cell,'FontSize',submarksize,...
-    'HorizontalAlignment','center','VerticalAlignment','bottom','FitBoxToText','on');
+    'HorizontalAlignment','center','VerticalAlignment','bottom','FitBoxToText','on',...
+    'LineStyle','none');
 % Figure letter labels
 annot_wid_x = 0.04; annot_wid_y = 0.04;
 annot_pos_x = [(x(1)+0.009)*ones(1,2),(x(2)+0.009)*ones(1,2)];
@@ -104,7 +105,7 @@ for i = 1:4
     annotation('textbox',[annot_pos_x(i),annot_pos_y(i),annot_wid_x,annot_wid_y],...
         'String',char(64+i),'HorizontalAlignment','center',...
         'VerticalAlignment','middle','FontWeight','bold','FontSize',20,...
-        'Fitboxtotext','off','BackgroundColor',[1,1,1]);
+        'Fitboxtotext','off','BackgroundColor',[1,1,1],'LineStyle','none');
 end 
 fname1 = [fig_path,filesep,char(datetime('now','Format','yyyyMMdd')),'_SummaryQOLOverTime_AllSub.fig'];
 savefig(fig1,fname1)
@@ -145,7 +146,7 @@ ha(4).Position = [x(2) y(1) xwid ywid];
 set(ha,'box','on','XTick',1:4,'XLim',[0.75 4.25])
 set(ha(1),'YDir','reverse','YLim',[-70,20])
 set(ha(2),'YLim',[-0.039,0.259])
-set(ha(3),'YDir','reverse','YLim',[-4.5,0.75])
+set(ha(3),'YDir','reverse','YLim',[-4.5,2.75])
 set(ha(4),'YLim',[-0.83,0.83])
 set(ha(1:2),'XTickLabel',[])
 set(ha(3:4),'XTickLabel',{'0','0.5','1','2'});
@@ -155,7 +156,8 @@ leg1 = legend(ha(1),h1,leg1_labs,'Location','southwest','NumColumns',2,'box','of
 leg1.ItemTokenSize(1) = 15;
 leg1.Position = [0.5-0.5*leg1.Position(3),0,leg1.Position(3:4)];
 annotation('textbox',[0 leg1.Position(4) 1 xmin],'String',leg_cell,'FontSize',submarksize,...
-    'HorizontalAlignment','center','VerticalAlignment','bottom','FitBoxToText','on');
+    'HorizontalAlignment','center','VerticalAlignment','bottom','FitBoxToText','on',...
+    'LineStyle','none');
 %Figure letter labels
 annot_wid_x = 0.042;  annot_wid_y = 0.06;
 annot_pos_x = [(x(1)+0.009)*ones(1,2),(x(2)+0.009)*ones(1,2)];
@@ -164,7 +166,7 @@ for i = 1:4
     annotation('textbox',[annot_pos_x(i),annot_pos_y(i),annot_wid_x,annot_wid_y],...
         'String',char(64+i),'HorizontalAlignment','center',...
         'VerticalAlignment','middle','FontWeight','bold','FontSize',20,...
-        'Fitboxtotext','off','BackgroundColor',[1,1,1]);
+        'Fitboxtotext','off','BackgroundColor',[1,1,1],'LineStyle','none');
 end 
 fname2 = [fig_path,filesep,char(datetime('now','Format','yyyyMMdd')),'_SummaryQOLPreOpChange_AllSub.fig'];
 savefig(fig2,fname2)
