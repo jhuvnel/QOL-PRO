@@ -8,6 +8,7 @@ end
 fig_path = [MVI_path,filesep,'Summary Figures'];
 subjects = unique(all_results(2:end,1));
 sub_mark = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; 
+sub_info = readtable([MVI_path,filesep,'MVI_Information.xlsx']);
 survs = {'DHI Overall','SF-36 Utility','VADL Overall','HUI3 Overall'};
 MCIDs = [18,0.03,0.65,0.03];
 %Find indecies that correspond to visits of interest
@@ -71,7 +72,7 @@ for i = 1:4
         sub_rel_inds = find(contains(sub_surv(:,1),subjects{j}));
         sub_rel_inds(sub_rel_inds<max(ind(1:2,j),[],'omitnan')) = []; %Remove surveys before visit 1 or 0
         rel_mat = [sub_surv{sub_rel_inds,4}];
-        sub_t = days(datetime(sub_surv(sub_rel_inds,2))-datetime(sub_surv(ind(3,j),2)))+30;
+        sub_t = days(datetime(sub_surv(sub_rel_inds,2))-sub_info.Activation(j))+30;
         sub_t(1) = 17; %Shift visit 0 for plotting
         text(sub_t,rel_mat,sub_mark(j),'Color',sublinecol,'FontSize',submarksize,'HorizontalAlignment','center'); % plot subject labels
         plot(sub_t,rel_mat,':','Color',sublinecol,'LineWidth',sublinewid)
