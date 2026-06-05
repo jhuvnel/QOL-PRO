@@ -300,9 +300,9 @@ elseif opt == 2
     source_path = [MVI_path,filesep,char(rel_dir),filesep,visit,filesep,'Questionnaires'];
     dateval = char(datetime(surv.EndDate(sub_row),'Format','yyyy-MM-dd HH:mm'));
     switch subject
-        case {'MVI011R031','MVI012R897','MVI013R864','MVI016R873'}
+        case {'MVI011R031','MVI012R897','MVI013R864','MVI016R873','MVI024R1328'}
             fold = 'IRB00335294 NIDCD';
-        case {'MVI014R1219','MVI015R1209','MVI017R1283','MVI018R1313','MVI019R1211','MVI020R124','MVI021R127','MVI022R1263','R164','R1054'}
+        case {'MVI014R1219','MVI015R1209','MVI017R1283','MVI018R1313','MVI019R1211','MVI020R124','MVI021R127','MVI022R1263','MVI023R1368','R164','R1054'}
             fold = 'IRB00346924 NIA';
         otherwise %old protocol for MVI1-10 and R205
             fold = 'NA_00051349';
