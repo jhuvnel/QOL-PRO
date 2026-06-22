@@ -72,12 +72,33 @@ function [AI_subscores,AI_score] = scoreAI(scores)
     AI_score = sum(scores); 
 end
 %% Bilateral Vestibulopathy Questionnaire
-% As of 2022-09-07, there is no scoring system yet for the BVQ.
-% This script will NEED TO BE UPDATED once there is
+% Using scoring method described in Karabulut et al (2026), J Int Adv Otol
+% https://doi.org/10.65717/iao.2026.252104
+% Only uses shortened 20-item BVQ described in can Stiphout et al (2023), FNeur
+% https://doi.org/10.3389/fneur.2023.1221037
+
 function [BVQ_subscores,BVQ_tot] = scoreBVQ(scores)
-s = scores;
-BVQ_subscores = {};
-BVQ_tot = [];
+    BVQ_subscores = strcat(repmat({'BVQ '},1,5),...
+            {'Overall','Oscillopsia','Imbalance','Emotion','Cognition'})';
+    BVQ_tot = nan(5,1);
+    if ~isempty(scores)
+        if iscell(scores)&&isnumeric(scores{1})
+            scores = [scores{:}];
+        elseif iscell(scores)
+            scores = cellfun(@str2double,scores);
+        end
+    
+        % invert scoring scale for these items since they are phrased positively. All other likert-type items were phrasaed negatively.
+        scores([23 25 28]) = 7 - scores([23 25 28]); 
+        
+        % only using the short 24-question BVQ (of which only Q's 1-20 are
+        % scored since 21-24 are VAS)
+        BVQ_tot(2) = mean(scores(8:13)); % oscillopsia
+        BVQ_tot(3) = mean(scores([1:4 6 7])); % imbalance
+        BVQ_tot(4) = mean(scores([26 28 32 33 34])); % emotion
+        BVQ_tot(5) = mean(scores(19:21)); % cognition
+        BVQ_tot(1) = sum(BVQ_tot(2:5)); % total/overall score is sum of mean subscores        
+    end
 end
 %% Dizziness Handicap Index
 function [DHI_subscores,DHI_all] = scoreDHI(scores)    
@@ -139,8 +160,8 @@ function [EQ5D_subscores,EQ5D_all] = scoreEQ5D(scores)
         return;
     end
     % Scores and subscores
-    %Take from US Valudation of EQ-5D-5L Health States Using an Intermation Protocol
-    %Pickard et al. 2019
+    %Take from US Valuation of EQ-5D-5L Health States Using an International Protocol
+    %Pickard et al. 2019 https://doi.org/10.1016/j.jval.2019.02.009.
     MO = [0,-0.096,-0.122,-0.237,-0.322];
     SC = [0,-0.089,-0.107,-0.220,-0.261];
     UA = [0,-0.068,-0.101,-0.255,-0.255];

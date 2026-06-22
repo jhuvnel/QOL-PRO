@@ -60,7 +60,7 @@ if opt == 1
     %% Save files with REDCAP Candidates who are NOT yet in the MVI trial
     is_cand = find(cellfun(@(x) x(1),subs)=='R'&surv.Finished==1&~contains(subs,{'R141'})); %Is a candidate
     sub_labs = cell(length(is_cand),7);
-    score_mat = NaN(length(is_cand),51); %change when surveys change
+    score_mat = NaN(length(is_cand),56); %change when surveys change
     for i = 1:length(is_cand)
         h = is_cand(i);
         %Get the date and other characteristics
@@ -186,6 +186,7 @@ if opt == 1
     writetable(rep_scores,[Qualtrics_path,filesep,fname,'.xlsx'],'FileType','spreadsheet','WriteVariableNames',true,'Sheet','repeated');
     save([Qualtrics_path,filesep,fname,'.mat'],'REDCAP')
     REDCAP_Demographics(REDCAP.BySubject);
+    
     % Make a new pooled MVI subject file
     MVI_fnames = strcat(extractfield(dir([MVI_path,filesep,'MVI*R*',filesep,'MVI*_SurveyResponses.xlsx']),'folder'),filesep,extractfield(dir([MVI_path,filesep,'MVI*R*',filesep,'MVI*_SurveyResponses.xlsx']),'name'));
     subjects = strrep(extractfield(dir([MVI_path,filesep,'MVI*R*',filesep,'MVI*_SurveyResponses.xlsx']),'name'),'_SurveyResponses.xlsx','');

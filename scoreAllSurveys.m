@@ -15,6 +15,14 @@ end
 %% ParseQualtricsResponses
 %Turn numeric responses from the Excel output of the Qualtrics into the
 %letters/numbers expected of a paper response
+% Inputs:
+%   survey - char, name of survey to be scored
+%   num - question number for surveys (from label in Qualtrics)
+%   surv - table of all survey responses/values
+%   sub_row - row in table for the specific survey/subject response to be
+%   scored
+% Outputs:
+%   scores - vector of raw/unprocessed scores for that survey
 function scores = parseQualtricsResponses(survey,num,surv,sub_row)
     Qnum = ['Q',num2str(num),'_',]; 
     labs = surv.Properties.VariableNames;
@@ -96,6 +104,14 @@ function scores = parseQualtricsResponses(survey,num,surv,sub_row)
             end
             vec(isnan(vec)) = 11; %NaN case
             scores = num2cell(vec);
+        case {'BVQ'}
+            Qs = surv{sub_row,contains(labs,Qnum)}';
+            if iscell(Qs)
+                vec = cellfun(@str2double,Qs);
+            else
+                vec = Qs;
+            end
+            scores = vec;
         otherwise
             scores = [];
     end
