@@ -5,14 +5,17 @@
 %rest of the scripts/functions in this repository.
 %QOLA Menu Options
 opts = {'Score One Survey','Add Survey to MVI File',...
-    'Remake REDCAP/MVI Summary','Plot MVI Surveys',...
-    'Plot MVI Summary','Plot Candidate Scores'};
+    'Remake REDCAP/MVI Summary','Add Survey to NORM File',...
+    'Plot MVI Surveys','Plot MVI Summary','Plot Candidate Scores'};
 resp1 = '';
 tf1 = 1;
 MVI_path = '';
+NORM_path = '';
 curr_path = cd;
-if strcmp(curr_path(end-13:end),'Study Subjects')
-    MVI_path = cd;
+if length(curr_path) > 13
+    if strcmp(curr_path(end-13:end),'Study Subjects')
+        MVI_path = cd;
+    end
 end
 while tf1
     switch resp1
@@ -22,6 +25,8 @@ while tf1
             [REDCAP,all_results,scores,MVI_path] = processQOL(2,MVI_path);
         case 'Remake REDCAP/MVI Summary'
             [REDCAP,all_results,scores,MVI_path] = processQOL(1,MVI_path);
+        case 'Add Survey to NORM File'
+            [~,all_results,scores,NORM_path] = processQOL(4,NORM_path);
         case 'Plot MVI Surveys'
             MVI_path = plotQOL_MVI_EachSurvey(MVI_path);
         case 'Plot MVI Summary'

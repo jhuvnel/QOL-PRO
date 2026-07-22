@@ -14,7 +14,7 @@
 
 function [REDCAP,all_results,scores,MVI_path] = processQOL(opt,MVI_path)
 %% Figure out which version to run
-opts = {'Remake REDCAP and MVI Summary Data','Add One Survey to MVI Excel File','Score One Survey'};
+opts = {'Remake REDCAP and MVI Summary Data','Add One Survey to MVI Excel File','Score One Survey','Add One Survey to NORM Excel File'};
 if nargin < 1
     [ind1,tf] = listdlg('PromptString','Select surveys to score.','ListString',opts,'SelectionMode','single','ListSize',[200 300]);
     if ~tf
@@ -25,36 +25,38 @@ end
 if ~isnumeric(opt)||~ismember(opt,1:length(opts)) %Invalid input
     opt = 1; %Default option, happens regardless
 end
-if nargin < 2 || isempty(MVI_path)
-    prompt = 'Select the MVI Study subject root folder.';
-    MVI_path = uigetdir(prompt,prompt);
-    if ~contains(MVI_path,'MVI')
-        disp(['The selected path does not contain the text "MVI", so it may be wrong: ',MVI_path])
+if opt < 4 % for MVI functions (not NORM)
+    if nargin < 2 || isempty(MVI_path)
+        prompt = 'Select the MVI Study subject root folder.';
+        MVI_path = uigetdir(prompt,prompt);
+        if ~contains(MVI_path,'MVI')
+            disp(['The selected path does not contain the text "MVI", so it may be wrong: ',MVI_path])
+        end
     end
+    %% Load in Qualtrics Excel File
+    surveys = {'HUI3','SF6D','SF36','EQ5D','DHI','VADL','ABC','VSS','VAS',...
+        'OVAS','BVQ','THI','AI','NHIS'}; %Add as needed
+    % Load the raw, numeric survey data
+    Qualtrics_path = [MVI_path,filesep,'Qualtrics'];
+    files = dir([Qualtrics_path,filesep,'*Questionnaires*.xlsx']);
+    [~,t_ind] = sort(datetime({files.date}));
+    in_path = [Qualtrics_path,filesep,files(t_ind(end)).name];
+    %Load surveys
+    warning('off')
+    surv = readtable(in_path);
+    warning('on')
+    %REMOVE INCOMPLETE SURVEYS
+    if iscell(surv.Finished)
+        surv.Finished = contains(surv.Finished,'True');
+    end
+    surv(~surv.Finished,:) = [];
+    if isdatetime(surv.EndDate(1))
+        identity = strcat(surv.Q1_2,{' | '},surv.Q1_3,{' | '},datestr(surv.EndDate));
+    else
+        identity = strcat(surv.Q1_2,{' | '},surv.Q1_3,{' | '},surv.EndDate);
+    end
+    subs = surv.Q1_2;
 end
-%% Load in Qualtrics Excel File
-surveys = {'HUI3','SF6D','SF36','EQ5D','DHI','VADL','ABC','VSS','VAS',...
-    'OVAS','BVQ','THI','AI','NHIS'}; %Add as needed
-% Load the raw, numeric survey data
-Qualtrics_path = [MVI_path,filesep,'Qualtrics'];
-files = dir([Qualtrics_path,filesep,'*Questionnaires*.xlsx']);
-[~,t_ind] = sort(datetime({files.date}));
-in_path = [Qualtrics_path,filesep,files(t_ind(end)).name];
-%Load surveys
-warning('off')
-surv = readtable(in_path);
-warning('on')
-%REMOVE INCOMPLETE SURVEYS
-if iscell(surv.Finished)
-    surv.Finished = contains(surv.Finished,'True');
-end
-surv(~surv.Finished,:) = [];
-if isdatetime(surv.EndDate(1))
-    identity = strcat(surv.Q1_2,{' | '},surv.Q1_3,{' | '},datestr(surv.EndDate));
-else
-    identity = strcat(surv.Q1_2,{' | '},surv.Q1_3,{' | '},surv.EndDate);
-end
-subs = surv.Q1_2;
 %% Run the options for this script
 if opt == 1
     %% Save files with REDCAP Candidates who are NOT yet in the MVI trial
@@ -390,6 +392,192 @@ elseif opt==3
     catch
         all_results = [];
     end
+elseif opt==4
+    %% Add survey to normative file
+    % Get normative path
+    NORM_path = MVI_path;
+    if isempty(NORM_path)
+        prompt = 'Select the normative root folder.';
+        NORM_path = uigetdir(prompt,prompt);
+        % NORM_path_contents = dir(NORM_path);
+        % if ~contains(NORM_path_contents.name(NORM_path_contents.isdir),'NORM')
+        %     disp(['The selected path does not contain any folders with the text "NORM", so it may be wrong: ',NORM_path])
+        % end
+    end
+    % Load in Qualtrics Excel File
+    surveys = {'HUI3','SF6D','SF36','EQ5D','DHI','VADL','ABC','VSS','VAS',...
+        'OVAS','BVQ','THI','AI','NHIS'}; %Add as needed
+    % Load the raw, numeric survey data
+    if NORM_path(end) == filesep % remove trailing filesep (\) if present in the path
+        NORM_path = NORM_path(1:end-1);
+    end
+    Qualtrics_path = [NORM_path,filesep,'Qualtrics'];
+    files = dir([Qualtrics_path,filesep,'*Normative*Survey*.xlsx']);
+    [~,t_ind] = sort(datetime({files.date}));
+    in_path = [Qualtrics_path,filesep,files(t_ind(end)).name];
+    %Load surveys
+    warning('off')
+    opts = detectImportOptions(in_path);
+    [opts.VariableTypes{18:290}] = deal('char');
+    surv = readtable(in_path, opts);
+    warning('on')
+    %REMOVE INCOMPLETE SURVEYS
+    if iscell(surv.Finished)
+        surv.Finished = contains(surv.Finished,'True');
+    end
+    surv(~surv.Finished,:) = [];
+    if isdatetime(surv.EndDate(1))
+        identity = strcat(surv.Q1_2,{' | '},datestr(surv.EndDate));
+    else
+        identity = strcat(surv.Q1_2,{' | '},surv.EndDate);
+    end
+    subs = surv.Q1_2;
+
+    %Select which row to score
+    [sub_indx,tf] = listdlg('PromptString','Select surveys to score.','ListString',identity(end:-1:1),'SelectionMode','single','ListSize',[200 300]);
+    if tf==0
+        error('No surveys selected. Try again.')
+    end
+    sub_row = size(surv,1)+1-sub_indx;
+    sub_name = surv.Q1_2{sub_row};
+    %Select the file to put it into
+    NORM_dir = extractfield(dir([NORM_path,filesep,'NORM*']),'name');
+    NORM_fnames = strcat(extractfield(dir([NORM_path,filesep,'NORM*',filesep,'NORM*_SurveyResponses.xlsx']),'folder'),filesep,extractfield(dir([NORM_path,filesep,'NORM*',filesep,'NORM*_SurveyResponses.xlsx']),'name'));
+    rel_file = NORM_fnames(contains(NORM_fnames,sub_name));
+    rel_dir = NORM_dir(contains(strrep(NORM_dir,'_',''),sub_name));
+    if length(rel_file)==1 %Unique file exists as expected
+        out_path = rel_file{:};
+    elseif isempty(rel_file)&&length(rel_dir)==1 %MVI directory made but no file exists yet
+        disp('NORM directory for this subject has been made but no file exists yet. Creating .xlsx file.')
+        out_path = [NORM_path,filesep,rel_dir{:},filesep,strrep(rel_dir{:},'_',''),'_SurveyResponses.xlsx'];
+        writetable(table(),out_path);
+    elseif length(rel_file)>1||length(rel_dir)>1
+        error(['More than one directory found for the subject name: ',sub_name,'. Unclear which file to add scores to.'])
+    elseif isempty(rel_file)&&isempty(rel_dir)
+        error(['No directories found for the subject name: ',sub_name,'. Create one in the NORM*** format and retry.'])
+    end
+    % Properly format the visit name
+    %Get the right visit name
+    visit = '1';
+    val_vis = questdlg({'Does this visit name below look right? This will be the Excel column label.',visit},'','Yes','No','Yes');
+    if ~strcmp(val_vis,'Yes')
+        visit = inputdlg('Enter the correct visit name');
+        visit = visit{:};
+    end
+    % Score
+    [score_labs,scores,res] = scoreAllSurveys(surv,sub_row,surveys);
+    % Figure out what column to put the responses in
+    %Works for Excel columns A - ZZ
+    Alphabet = num2cell('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+    col_names = [Alphabet,strcat(reshape(repmat(Alphabet,26,1),[],1)',repmat(Alphabet,1,26))];
+    %Find where the visit should go
+    dates = readcell(out_path);
+    %Get the date
+    date = cellstr(string(surv.EndDate(sub_row),'dd-MMM-yyyy'));
+    if isempty(dates) %Empty sheet
+        col = 'B';
+    else
+        dates = dates(1,:);
+        [~,b] = ismember(dates,date);
+        if any(b) %already a column label
+            col_num = find(b);
+        else %add to the end
+            col_num = length(b)+1;
+        end
+        col = col_names{col_num};
+    end
+    %Make labels for column 1
+    col_labs = [{'Date';'Visit'};strcat('Q',cellfun(@num2str,num2cell(1:100),'UniformOutput',false))'];
+    % Write to MVI Excel file
+    %Write Column 1 labels
+    writetable(cell2table([{'Date'};{'Visit'};score_labs]),out_path,'FileType','spreadsheet','WriteVariableNames',false,'Sheet','Scores','Range',['A1:A',num2str(length(scores)+2)]);
+    %Write new results
+    writetable(cell2table([date;{visit};scores]),out_path,'FileType','spreadsheet','WriteVariableNames',false,'Sheet','Scores','Range',[col,'1:',col,num2str(length(scores)+2)]);
+    disp(identity(sub_row))
+    disp([[{'Date'};{'Visit'};score_labs],[date;{visit};scores]])
+    %Individual Responses
+    for i = 1:length(surveys)
+        test = res.(strrep(surveys{i},'-',''));
+        %Write Column 1 labels
+        writetable(cell2table(col_labs(1:length(test)+2)),out_path,'FileType','spreadsheet','WriteVariableNames',false,'Sheet',surveys{i},'Range',['A1:A',num2str(length(test)+2)]);
+        %Write new results
+        writetable(cell2table([date;{visit};test]),out_path,'FileType','spreadsheet','WriteVariableNames',false,'Sheet',surveys{i},'Range',[col,'1:',col,num2str(length(test)+2)]);
+    end
+    % % Make the CRF
+    % CRF_path = [NORM_path(1:(strfind(NORM_path,'Study')-1)),'CRFs',filesep];
+    % fig = figure(1);
+    % set(fig,'Units','inches','Position',[1 1 8.5 11],'Color','w');
+    % examiner = 'EOV';
+    % msg = 'Completed'; %Normal completed message
+    % subject = strrep(char(rel_dir),'_','');
+    % visit = ['Visit ',visit];
+    % source_path = [NORM_path,filesep,char(rel_dir),filesep,visit,filesep,'Questionnaires'];
+    % dateval = char(datetime(surv.EndDate(sub_row),'Format','yyyy-MM-dd HH:mm'));
+    % switch subject
+    %     case {'MVI011R031','MVI012R897','MVI013R864','MVI016R873','MVI024R1328'}
+    %         fold = 'IRB00335294 NIDCD';
+    %     case {'MVI014R1219','MVI015R1209','MVI017R1283','MVI018R1313','MVI019R1211','MVI020R124','MVI021R127','MVI022R1263','MVI023R1368','R164','R1054'}
+    %         fold = 'IRB00346924 NIA';
+    %     otherwise %old protocol for MVI1-10 and R205
+    %         fold = 'NA_00051349';
+    % end
+    % protocol = strrep(strrep(fold,' NIA',''),' NIDCD','');
+    % visit_fold = extractfield(dir([CRF_path,fold,filesep,subject,filesep,visit,' *-*']),'name');
+    % if isempty(visit_fold) %Non typical visit name found
+    %     visit_fold = 'Visit Nx - (Day XXX) Monitor - X yrs Post-Act - visit applicable only if device still act';
+    % end
+    % out_CRF = [CRF_path,fold,filesep,subject,filesep,char(visit_fold),filesep,...
+    %     '14_13 Questionnaires',filesep,'14_13_CRF_Questionnaires_',subject,'_',visit];
+    % % Make text
+    % CRF_txt = ['Case Report Form Protocol: ',protocol,newline,...
+    %     'Case Report Form Version: 2024-03-29',newline,...
+    %     'Case Report Form Test: Patient Reported Outcomes',newline,...
+    %     'Subject ID: ',subject,newline,'Visit: ',visit,newline,...
+    %     'General Status and Adverse Events: ',msg,newline,...
+    %     'Jacobsen Dizziness Handicap Inventory (DHI): ',msg,newline,...
+    %     'Vestibular Disorders-Activities of Daily Living (VADL): ',msg,newline,...
+    %     'Health Utilities Index-3 (HUI3): ',msg,newline,...
+    %     'Short Form-36 (SF-36): ',msg,newline,...
+    %     'Tinnitus Handicap Inventory (THI): ',msg,newline,...
+    %     'Autophony Index (AI): ',msg,newline,...
+    %     '2008 National Health Interview Survey Balance Questions: ',msg,newline,...
+    %     'EuroQol-5D-5L (EQ5D): ',msg,newline,...
+    %     'Activities of Balance Confidence (ABC): ',msg,newline,...
+    %     'Vertigo Symptom Scale (VSS): ',msg,newline,...
+    %     'Vertical Visual Analogue Scale (VAS): ',msg,newline,...
+    %     'Oscillopsia Visual Analogue Scale (oVAS): ',msg,newline,...
+    %     'Short Form-6D (SF-6D): ',msg,newline,...
+    %     'Bilateral Vestibulopathy Questionnaire (BVQ): ',msg,newline,...
+    %     'Examiners: ',examiner,newline,'Times: ',dateval,newline,'Source Data: ',source_path];
+    % %Save as pdf
+    % clf;
+    % annotation('textbox','Position',[0 0 1 1],'EdgeColor','none','String',CRF_txt,'FitBoxToText','on','Interpreter', 'none')
+    % saveas(fig,[out_CRF,'.pdf'])
+    % Make a new pooled MVI subject file
+    % subjects = strrep(NORM_dir,'_','');
+    subjects = extract(NORM_fnames,'NORM' + digitsPattern(3));
+    subjects = subjects(:,2);
+    all_results = cell(length(NORM_fnames),1);
+    %Assumes they all have the same score order
+    for i = 1:length(NORM_fnames)
+        %Reads the first sheet as the right sheet, thankfully
+        scores2 = readcell(NORM_fnames{i},'Sheet','Scores');
+        all_results{i} = [repmat(subjects(i),1,size(scores2,2)-1);scores2(:,2:end)]';
+    end
+    %Trim off the excess
+    all_results = [[{'Subject'},scores2(:,1)'];vertcat(all_results{:})];    
+    if any(cellfun(@isnumeric,all_results(:,3))) %Old MATLAB version
+        all_results(cellfun(@isnumeric,all_results(:,3)),3) = {''}; %Replace NaN with empty cell for visit name
+    else %2024-06-26 AIA noticed that column titles were tagged as "missing" results 
+        ind = cellfun(@(x) any(ismissing(x)),all_results);
+        ind(1,:) = 0;
+        all_results(ind) = {''}; %Replace NaN with empty cell for visit name
+    end
+    save([NORM_path,filesep','ALLNORM-SurveyResults.mat'],'all_results')
+    writecell(all_results,[NORM_path,filesep','ALLNORM-SurveyResults.xlsx'])
+    % Set dummy REDCAP and MVI_path outputs
+    REDCAP = [];
+    MVI_path = NORM_path;
 end
 disp('Done!')
 end

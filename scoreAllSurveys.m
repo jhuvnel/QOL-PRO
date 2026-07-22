@@ -78,8 +78,14 @@ function scores = parseQualtricsResponses(survey,num,surv,sub_row)
             else
                 vec(2:6,1) = 0; %NOT TRUE but a placeholder
             end
-            if ~isempty(surv{sub_row,contains(labs,[Qnum,'8'])})
+            if ~isempty(surv{sub_row,contains(labs,[Qnum,'8'])}) & ~iscell(surv{sub_row,contains(labs,[Qnum,'8'])})
                 vec(8,1) = surv{sub_row,contains(labs,[Qnum,'8'])}>2;
+            elseif iscell(surv{sub_row,contains(labs,[Qnum,'8'])})
+                if ~isempty(surv{sub_row,contains(labs,[Qnum,'8'])}{1})
+                    vec(8,1) = str2double(surv{sub_row,contains(labs,[Qnum,'8'])}{1})>2;
+                else % if they did not fill out this question
+                    vec(8,1) = 0;
+                end
             else % if they did not fill out this question
                 vec(8,1) = 0;
             end
@@ -131,15 +137,26 @@ end
 function surv = fixSF6DNumIssue(surv)
     rows = surv.EndDate > datetime(2021,11,01) & surv.EndDate < datetime(2022,02,24);
     old_Q3_2 = surv.Q3_2;
+    if isnumeric(old_Q3_2)
+        old_Q3_2 = cellstr(string(old_Q3_2));
+    end
     old_Q3_3 = surv.Q3_3;
+    if isnumeric(old_Q3_3)
+        old_Q3_3 = cellstr(string(old_Q3_3));
+    end
     old_Q3_5 = surv.Q3_5;
-    surv.Q3_2(rows&contains(old_Q3_2,'7')) = {'2'};
-    surv.Q3_2(rows&contains(old_Q3_2,'8')) = {'3'};
-    surv.Q3_2(rows&contains(old_Q3_2,'2')) = {'4'};
-    surv.Q3_3(rows&contains(old_Q3_3,'6')) = {'2'};
-    surv.Q3_3(rows&contains(old_Q3_3,'7')) = {'3'};
-    surv.Q3_3(rows&contains(old_Q3_3,'2')) = {'4'};
-    surv.Q3_3(rows&contains(old_Q3_3,'3')) = {'5'};
-    surv.Q3_5(rows&contains(old_Q3_5,'6')) = {'2'};
-    surv.Q3_5(rows&contains(old_Q3_5,'2')) = {'3'};
+    if isnumeric(old_Q3_5)
+        old_Q3_5 = cellstr(string(old_Q3_5));
+    end
+    if isstring(old_Q3_2)
+        surv.Q3_2(rows&contains(old_Q3_2,'7')) = {'2'};
+        surv.Q3_2(rows&contains(old_Q3_2,'8')) = {'3'};
+        surv.Q3_2(rows&contains(old_Q3_2,'2')) = {'4'};
+        surv.Q3_3(rows&contains(old_Q3_3,'6')) = {'2'};
+        surv.Q3_3(rows&contains(old_Q3_3,'7')) = {'3'};
+        surv.Q3_3(rows&contains(old_Q3_3,'2')) = {'4'};
+        surv.Q3_3(rows&contains(old_Q3_3,'3')) = {'5'};
+        surv.Q3_5(rows&contains(old_Q3_5,'6')) = {'2'};
+        surv.Q3_5(rows&contains(old_Q3_5,'2')) = {'3'};
+    end
 end
