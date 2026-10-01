@@ -44,8 +44,14 @@ mark_size_med = 8;
 offs1 = 0.2*rand(length(subjects),1)-0.1;
 xlab = 'Years After Implantation';
 leg1_labs = {'Median Change from Pre-Op','Minimally Important Difference'};
-leg_cell = ['Participants   ',char(join(join([cellstr(sub_mark(1:length(subjects))'),...
-    strrep(cellstr(num2str((1:length(subjects))')),' ','')],':'),' '))];
+nsubs = length(subjects);
+line1subs = 1:ceil(nsubs/2);
+line2subs = ceil(nsubs/2)+1:nsubs;
+leg_cell = {['Participants   ',char(join(join([cellstr(sub_mark(line1subs)'),...
+    strrep(cellstr(num2str(line1subs')),' ','')],':'),' '))], char(join(join([cellstr(sub_mark(line2subs)'),...
+    strrep(cellstr(num2str(line2subs')),' ','')],':'),' '))};
+% leg_cell = ['Participants   ',char(join(join([cellstr(sub_mark(1:length(subjects))'),...
+%     strrep(cellstr(num2str((1:length(subjects))')),' ','')],':'),' '))];
 %% Fig 1: Scores Over Time Every Subject
 %Inialize size and labels
 xmin = 0.07; xmax = 0.99; xspc = 0.08;
@@ -95,7 +101,7 @@ xlabel(ha(3:4),xlab)
 title(ha(1),{'Vestibular Disability and Dizziness'})
 title(ha(2),{'Health-Related Quality of Life'})
 % Legend
-annotation('textbox',[0.01 0.01 0.98 xmin],'String',leg_cell,'FontSize',submarksize,...
+annotation('textbox',[0.01 0.003 0.98 xmin],'String',leg_cell,'FontSize',submarksize,...
     'HorizontalAlignment','center','VerticalAlignment','bottom','FitBoxToText','on',...
     'LineStyle','none');
 % Figure letter labels
@@ -156,7 +162,7 @@ xlabel(ha(3:4),xlab)
 leg1 = legend(ha(1),h1,leg1_labs,'Location','southwest','NumColumns',2,'box','off');
 leg1.ItemTokenSize(1) = 15;
 leg1.Position = [0.5-0.5*leg1.Position(3),0,leg1.Position(3:4)];
-annotation('textbox',[0 leg1.Position(4) 1 xmin],'String',leg_cell,'FontSize',submarksize,...
+annotation('textbox',[0 leg1.Position(4)-0.02 1 xmin],'String',leg_cell,'FontSize',submarksize,...
     'HorizontalAlignment','center','VerticalAlignment','bottom','FitBoxToText','on',...
     'LineStyle','none');
 %Figure letter labels
